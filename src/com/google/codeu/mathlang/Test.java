@@ -129,6 +129,16 @@ final class Test {
         });
 
     tester.test(
+        "Print with big space",
+        lines("print \"hello\"\n\n\n \"world\";"),
+        new TestCriteria(){
+          @Override
+          public void onTestEnd(CallTable calls) throws Exception{
+            calls.assertNext("print", "hello", "world");
+            calls.assertEnd();
+          }
+        });
+    tester.test(
         "Assign variable as constant",
         lines("let x = 5;"),
         new TestCriteria() {
@@ -226,6 +236,35 @@ final class Test {
             calls.assertEnd();
           }
         });
+    
+    tester.test(
+        "Math with multiple digits", 
+        lines("let x = 52394;", 
+              "print x;"),
+        new TestCriteria(){
+          @Override
+          public void onTestEnd(CallTable calls) throws Exception{
+            calls.assertNext("let", new AddOperation(52394));
+            calls.assertNext("print", "52394.0");
+            calls.assertEnd();
+          }
+        });
+
+    tester.test(
+        "Math with decimals", 
+        lines("let x = 12.3;",
+              "let y = x + 1.2;", 
+             "print y;"),
+        new TestCriteria(){
+          @Override 
+          public void onTestEnd(CallTable calls) throws Exception{
+            calls.assertNext("let", new AddOperation(12.3));
+            calls.assertNext("let", new AddOperation(12.3), new AddOperation(1.2));
+            calls.assertNext("print", "13.5");
+            calls.assertEnd();
+          }
+        });
+      
   }
 
   private static String lines(String... lines) {
